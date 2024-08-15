@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS CDN -->
+    <link href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <!-- Dashboard with Tabs -->
+        <ul class="nav nav-tabs" id="articleTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="published-tab" data-toggle="tab" href="#published" role="tab">Published</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="drafts-tab" data-toggle="tab" href="#drafts" role="tab">Drafts</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="trashed-tab" data-toggle="tab" href="#trashed" role="tab">Trashed</a>
+            </li>
+        </ul>
+        <div class="tab-content mt-3" id="articleTabContent">
+            <!-- Published Articles Tab -->
+            <div class="tab-pane fade show active" id="published" role="tabpanel">
+                <h2>Add/Edit Article</h2>
+                <form id="articleForm">
+                    <input type="hidden" id="articleId" name="id">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <input type="text" class="form-control" id="category" name="category" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select class="form-control" id="status" name="status" required>
+                    <option value="publish">Publish</option>
+                    <option value="draft">Draft</option>
+                    <option value="thrash">Trashed</option>
+                </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+                <h3 class="mt-4">Published Articles</h3>
+                <table id="publishedTable" class="display table table-bordered table-striped table-hover responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Content</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Draft Articles Tab -->
+            <div class="tab-pane fade" id="drafts" role="tabpanel">
+                <h3 class="mt-4">Draft Articles</h3>
+                <table id="draftsTable" class="display table table-bordered table-striped table-hover responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Content</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Trashed Articles Tab -->
+            <div class="tab-pane fade" id="trashed" role="tabpanel">
+                <h3 class="mt-4">Trashed Articles</h3>
+                <table id="trashedTable" class="display table table-bordered table-striped table-hover responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Content</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies (jQuery and Popper.js) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- DataTables JS CDN -->
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables
+            var publishedTable = $('#publishedTable').DataTable({
+                ajax: {
+                    url: '/articles/', // URL to fetch article data
+                    dataSrc: ''
+                },
+                columns: [{
+                    data: 'id'
+                }, {
+                    data: 'title'
+                }, {
+                    data: 'content'
+                }, {
+                    data: 'category'
+                }, {
+                    data: 'status'
+                }, {
+                    data: null,
+                    render: function(data, type, row) {
+                        return '<button class="btn btn-info btn-sm editBtn" data-id="' + row.id + '">Edit</button>' +
+                            ' <button class="btn btn-danger btn-sm deleteBtn" data-id="' + row.id + '">Delete</button>';
+                    }
+                }]
+            });
+
+            var draftsTable = $('#draftsTable').DataTable({
+                ajax: {
+                    url: '/articles?status=draft', // URL to fetch draft articles
+                    dataSrc: ''
+                },
+                columns: [{
+                    data: 'id'
+                }, {
+                    data: 'title'
+                }, {
+                    data: 'content'
+                }, {
+                    data: 'category'
+                }, {
+                    data: 'status',
+                    render: function(data, type, row) {
+                        return '<span class="alert alert-info">Draft</span>';
+                    }
+                }, {
+                    data: null,
+                    render: function(data, type, row) {
+                        return '<button class="btn btn-info btn-sm editBtn" data-id="' + row.id + '">Edit</button>' +
+                            ' <button class="btn btn-danger btn-sm deleteBtn" data-id="' + row.id + '">Delete</button>';
+                    }
+                }]
+            });
+
+            var trashedTable = $('#trashedTable').DataTable({
+                ajax: {
+                    url: '/articles?status=thrash', // URL to fetch trashed articles
+                    dataSrc: ''
+                },
+                columns: [{
+                    data: 'id'
+                }, {
+                    data: 'title'
+                }, {
+                    data: 'content'
+                }, {
+                    data: 'category'
+                }, {
+                    data: 'status',
+                    render: function(data, type, row) {
+                        return '<span class="alert alert-danger">Trashed</span>';
+                    }
+                }, {
+                    data: null,
+                    render: function(data, type, row) {
+                        return '<button class="btn btn-info btn-sm editBtn" data-id="' + row.id + '">Edit</button>' +
+                            ' <button class="btn btn-danger btn-sm deleteBtn" data-id="' + row.id + '">Delete</button>';
+                    }
+                }]
+            });
+
+            // Handle form submission
+            $('#articleForm').on('submit', function(e) {
+                e.preventDefault();
+                const id = $('#articleId').val();
+                const url = id ? `/article/${id}` : '/article/';
+                const method = id ? 'PUT' : 'POST';
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        title: $('#title').val(),
+                        content: $('#content').val(),
+                        category: $('#category').val(),
+                        status: $('#status').val()
+                    }),
+                    success: function(response) {
+                        alert(response.message);
+                        publishedTable.ajax.reload();
+                        draftsTable.ajax.reload();
+                        trashedTable.ajax.reload();
+                    },
+                    error: function(response) {
+                        alert(response.responseJSON.error);
+                    }
+                });
+            });
+
+            // Handle edit button click
+            $('#publishedTable, #draftsTable, #trashedTable').on('click', '.editBtn', function() {
+                const id = $(this).data('id');
+                $.ajax({
+                    url: `/article/${id}`,
+                    method: 'GET',
+                    success: function(data) {
+                        $('#articleId').val(data.id);
+                        $('#title').val(data.title);
+                        $('#content').val(data.content);
+                        $('#category').val(data.category);
+                        $('#status').val(data.status);
+                        $('a[href="#published"]').tab('show');
+                    }
+                });
+            });
+
+            // Handle delete button click
+            $('#publishedTable, #draftsTable, #trashedTable').on('click', '.deleteBtn', function() {
+                const id = $(this).data('id');
+                if (confirm('Are you sure you want to delete this article?')) {
+                    $.ajax({
+                        url: `/article/${id}`,
+                        method: 'DELETE',
+                        success: function(response) {
+                            alert(response.message);
+                            publishedTable.ajax.reload();
+                            draftsTable.ajax.reload();
+                            trashedTable.ajax.reload();
+                        },
+                        error: function(response) {
+                            alert(response.responseJSON.error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
