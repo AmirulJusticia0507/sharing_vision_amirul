@@ -59,11 +59,34 @@
                         <select class="form-control" id="status" name="status" required>
                     <option value="publish">Publish</option>
                     <option value="draft">Draft</option>
-                    <option value="thrash">Trashed</option>
+                    <option value="trash">Trashed</option>
                 </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
+
+                <!-- Preview Modal -->
+                <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="previewModalLabel">Article Preview</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                            </div>
+                            <div class="modal-body">
+                                <h3 id="previewTitle"></h3>
+                                <p><strong>Category:</strong> <span id="previewCategory"></span></p>
+                                <p id="previewContent"></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <h3 class="mt-4">Published Articles</h3>
                 <table id="publishedTable" class="display table table-bordered table-striped table-hover responsive nowrap" style="width:100%">
                     <thead>
@@ -150,7 +173,8 @@
                     data: null,
                     render: function(data, type, row) {
                         return '<button class="btn btn-info btn-sm editBtn" data-id="' + row.id + '">Edit</button>' +
-                            ' <button class="btn btn-danger btn-sm deleteBtn" data-id="' + row.id + '">Delete</button>';
+                            ' <button class="btn btn-danger btn-sm deleteBtn" data-id="' + row.id + '">Delete</button>' +
+                            ' <button class="btn btn-secondary btn-sm previewBtn" data-id="' + row.id + '" data-title="' + row.title + '" data-content="' + row.content + '" data-category="' + row.category + '">Preview</button>';
                     }
                 }]
             });
@@ -208,6 +232,20 @@
                     }
                 }]
             });
+
+            // Handle preview button click
+            $('#publishedTable, #draftsTable, #trashedTable').on('click', '.previewBtn', function() {
+                const title = $(this).data('title');
+                const content = $(this).data('content');
+                const category = $(this).data('category');
+
+                $('#previewTitle').text(title);
+                $('#previewContent').text(content);
+                $('#previewCategory').text(category);
+
+                $('#previewModal').modal('show');
+            });
+
 
             // Handle form submission
             $('#articleForm').on('submit', function(e) {
